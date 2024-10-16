@@ -26,6 +26,7 @@ class TestAccountMove(common.TransactionCase):
             'type_tax_use': 'purchase',
             'is_postponed_vat': True,
         })
+        self.assertTrue(self.postponed_vat_purchase_id)
 
         self.partner_id = self.env['res.partner'].create({
             'name': 'Testing Partner',
@@ -38,6 +39,7 @@ class TestAccountMove(common.TransactionCase):
             'detailed_type': 'consu',
             'list_price': 100.0,
         })
+        self.assertTrue(self.product_id)
 
     def test_vendor_bill(self):
         '''
@@ -71,8 +73,16 @@ class TestAccountMove(common.TransactionCase):
             })],
             'partner_id': self.partner_id.id,
         })
+        # Checking the Bill State before validation
+        self.assertEqual(bill_id.state, 'draft', msg='The bill is not in Draft state')
+
         bill_id.action_post()
+        # Checking the Bill State after validation
+        self.assertEqual(bill_id.state, 'posted', msg='The bill is not in Posted state')
         reversal_move_id = bill_id.search([('reversed_entry_id', '=', bill_id.id)], limit=1)
 
         self.assertIn(bill_id, reversal_move_id.reversed_entry_id)
+
+        # Checking the Postponed VAT value to not equal the Bill value
+        self.assertNotEqual(reversal_move_id.amount_total, bill_id.amount_total)
         logger.info(' ===================== VB Note for Postponed Tax Created!')
