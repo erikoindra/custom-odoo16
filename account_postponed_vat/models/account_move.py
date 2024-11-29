@@ -68,9 +68,9 @@ class AccountMove(models.Model):
         Adding condition to create a new refund bill from vendor bill that have at least one product with postponed VAT
         """
         res = super(AccountMove, self).action_post()
-        for move in self:
+        for move in self.filtered(lambda x: x.move_type == 'in_invoice'):
             line_with_tax = move.invoice_line_ids.filtered(lambda line: line.tax_ids)
-            if line_with_tax and (move.move_type in ('out_invoice', 'in_invoice')):
+            if line_with_tax:
                 postponed_amount = 0
                 for line in line_with_tax:
                     postponed_taxes = line.tax_ids.filtered(lambda tax: tax.is_postponed_vat)
