@@ -42,8 +42,8 @@ class AccountMove(models.Model):
                 'account_id': account_reversed.id,
                 'quantity': 1,
                 'price_unit': amount,
-                'balance': -amount,
-                'amount_currency': -amount,
+                'balance': -(amount),
+                'amount_currency': -(amount),
                 'tax_ids': False,
             })],
         }]
